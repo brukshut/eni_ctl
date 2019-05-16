@@ -1,0 +1,9 @@
+## Only the DHCP server talking to eth0 is allowed to give us a default
+## route.  Other interfaces only get local-segment configuration.
+case ${interface} in
+  eth0)
+    ;;
+  *)
+    unset new_routers
+    ;;
+esac
