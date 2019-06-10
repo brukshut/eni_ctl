@@ -1,9 +1,7 @@
 #!/bin/bash -x
 
 ##
-## configure_eni.sh
-## wrapper script to fetch eni_ctl.sh and support files from git
-## suitable for use by packer
+## eni_ctl bootstrap.sh
 ##
 
 ## functions
@@ -18,12 +16,13 @@ function cleanup {
 
 function copy_files {
   for file in /lib/systemd/system/eni.service /etc/network/interfaces /etc/dhcp/dhclient.conf; do
-  [[ -e /tmp/eni_ctl/files/$(basename $file) ]] &&
-    ( sudo cp /tmp/eni_ctl/files/$(basename $file) $file
-      sudo chown root:root $file
-      sudo chmod 0644 $file )
+    filename=$(basename $file)
+    [[ -e /tmp/${filename} ]] && sudo cp /tmp/${filename} $file ||
+      ( [[ -e /tmp/eni_ctl/files/${filename} ]] && sudo cp /tmp/eni_ctl/files/${filename} $file )
+    sudo chown root:root $file
+    sudo chmod 0644 $file
     [[ $(basename $file) == 'eni.service' ]] &&
-      ( sudo systemctl daemon-reload && sudo systemctl enable eni.service )
+      sudo systemctl daemon-reload && sudo systemctl enable eni.service
   done
 
   for script in eni_ctl.sh add_routes.sh configure_eni.sh configure_interfaces.sh; do 
